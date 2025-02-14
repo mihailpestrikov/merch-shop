@@ -1,0 +1,6 @@
+.idea/
+.env
+*.env
+config.*.yaml
+config.yaml
+
