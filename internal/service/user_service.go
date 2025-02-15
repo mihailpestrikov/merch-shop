@@ -2,55 +2,112 @@ package service
 
 import (
 	"Avito-backend-trainee-assignment-winter-2025/internal/models"
+	"Avito-backend-trainee-assignment-winter-2025/repository"
 	"github.com/google/uuid"
-	"gorm.io/gorm"
+	"time"
 )
 
 type UserService interface {
 	TransferCoins(fromUserID, toUserID uuid.UUID, amount int) error
-	GetBalance(userID uuid.UUID) error
+	GetBalance(userID uuid.UUID) (int, error)
 	PurchaseMerch(userID uuid.UUID, merchItemID uuid.UUID) error
 	GetPurchasedItems(userID uuid.UUID) ([]models.MerchItem, error)
 	GetTransactionHistory(userID uuid.UUID) ([]models.Transaction, error)
 }
 
 type UserServiceImpl struct {
-	db *gorm.DB
+	userRepo     repository.UserRepository
+	merchService MerchService
 }
 
-func NewUserServiceImpl(db *gorm.DB) UserService {
-	return &UserServiceImpl{db: db}
+func NewUserServiceImpl(userRepo repository.UserRepository, merchService MerchService) *UserServiceImpl {
+	return &UserServiceImpl{userRepo: userRepo, merchService: merchService}
 }
 
-func (s *UserServiceImpl) GetBalance(userID uuid.UUID) error {
-	//TODO implement me
-	panic("implement me")
+func (s *UserServiceImpl) GetBalance(userID uuid.UUID) (int, error) {
+	user, err := s.userRepo.GetUserByID(userID)
+	if err != nil {
+		return 0, err
+	}
+	return user.Balance, nil
 }
 
 func (s *UserServiceImpl) TransferCoins(fromUserID, toUserID uuid.UUID, amount int) error {
-	//TODO implement me
-	panic("implement me")
+	fromUser, err := s.userRepo.GetUserByID(fromUserID)
+	if err != nil {
+		return err
+	}
+
+	toUser, err := s.userRepo.GetUserByID(toUserID)
+	if err != nil {
+		return err
+	}
+
+	if fromUser.Balance < amount {
+		return models.ErrInsufficientFunds
+	}
+
+	fromUser.Balance -= amount
+	toUser.Balance += amount
+
+	transaction := models.Transaction{
+		ID:         uuid.New(),
+		Type:       models.TransactionTypeTransfer,
+		FromUserID: fromUserID,
+		ToUserID:   toUserID,
+		Amount:     amount,
+		CreatedAt:  time.Now(),
+	}
+
+	if err := s.userRepo.UpdateUserBalance(fromUserID, fromUser.Balance, &transaction); err != nil {
+		return err
+	}
+
+	if err := s.userRepo.UpdateUserBalance(toUserID, toUser.Balance, &transaction); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *UserServiceImpl) PurchaseMerch(userID uuid.UUID, merchItemID uuid.UUID) error {
-	//TODO implement me
-	panic("implement me")
+	user, err := s.userRepo.GetUserByID(userID)
+	if err != nil {
+		return err
+	}
+
+	merchItem, err := s.merchService.GetMerchItemByID(merchItemID)
+	if err != nil {
+		return err
+	}
+
+	if user.Balance < merchItem.Price {
+		return models.ErrNotEnoughFunds
+	}
+
+	user.Balance -= merchItem.Price
+
+	transaction := models.Transaction{
+		ID:          uuid.New(),
+		Type:        models.TransactionTypePurchase,
+		FromUserID:  userID,
+		ToUserID:    userID,
+		Amount:      merchItem.Price,
+		MerchItemID: &merchItemID,
+		CreatedAt:   time.Now(),
+	}
+
+	if err := s.userRepo.UpdateUserBalance(userID, user.Balance, &transaction); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *UserServiceImpl) GetPurchasedItems(userID uuid.UUID) ([]models.MerchItem, error) {
-	var items []models.MerchItem
-	if err := s.db.Joins("JOIN transactions ON transactions.merch_item_id = merch_items.id").
-		Where("transactions.to_user_id = ? AND transactions.type = ?", userID, models.TransactionTypePurchase).
-		Find(&items).Error; err != nil {
-		return nil, err
-	}
-	return items, nil
+	return s.userRepo.GetPurchasedItems(userID)
 }
 
 func (s *UserServiceImpl) GetTransactionHistory(userID uuid.UUID) ([]models.Transaction, error) {
-	var transactions []models.Transaction
-	if err := s.db.Where("from_user_id = ? OR to_user_id = ?", userID, userID).Find(&transactions).Error; err != nil {
-		return nil, err
-	}
-	return transactions, nil
+	return s.userRepo.GetTransactionHistory(userID)
 }
