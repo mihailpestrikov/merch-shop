@@ -184,7 +184,6 @@ func (s *UserServiceImpl) GetUserByID(userID uuid.UUID) (*models.User, error) {
 		s.log.Error().Err(err).Msg("Error getting user by id")
 		return nil, err
 	}
-	s.log.Info().Msgf("Successfully got user: %s", user.Username)
 	return user, nil
 }
 
@@ -198,7 +197,6 @@ func (s *UserServiceImpl) GetUserByUsername(username string) (*models.User, erro
 		s.log.Error().Err(err).Msg("Error getting user by username")
 		return nil, err
 	}
-	s.log.Info().Msgf("Successfully got user: %s", user.Username)
 	return user, nil
 }
 
