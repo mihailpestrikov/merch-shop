@@ -35,6 +35,7 @@ func NewUserService(userRepo repository.UserRepository, transactionRepo reposito
 func (s *UserServiceImpl) GetBalance(userID uuid.UUID) (int, error) {
 	user, err := s.userRepo.GetUserByID(userID)
 	if err != nil {
+		s.log.Error().Err(err).Msgf("Failed to get balance of user with ID: %s", userID)
 		return 0, err
 	}
 	return user.Balance, nil
@@ -43,11 +44,13 @@ func (s *UserServiceImpl) GetBalance(userID uuid.UUID) (int, error) {
 func (s *UserServiceImpl) TransferCoins(fromUserID, toUserID uuid.UUID, amount int) error {
 	fromUser, err := s.userRepo.GetUserByID(fromUserID)
 	if err != nil {
+		s.log.Error().Err(err).Msgf("Failed to get fromUser with ID: %s", fromUserID)
 		return err
 	}
 
 	toUser, err := s.userRepo.GetUserByID(toUserID)
 	if err != nil {
+		s.log.Error().Err(err).Msgf("Failed to get toUser with ID: %s", fromUserID)
 		return err
 	}
 
@@ -58,6 +61,7 @@ func (s *UserServiceImpl) TransferCoins(fromUserID, toUserID uuid.UUID, amount i
 
 	if fromUser.Balance < amount {
 		tx.Rollback()
+		s.log.Info().Msgf("User: %s does not have enough funds", fromUserID)
 		return models.ErrInsufficientFunds
 	}
 
@@ -74,39 +78,47 @@ func (s *UserServiceImpl) TransferCoins(fromUserID, toUserID uuid.UUID, amount i
 	}
 
 	if err := s.transactionRepo.CreateTransaction(tx, &transaction); err != nil {
+		s.log.Error().Err(err).Msgf("Failed to create transaction")
 		return err
 	}
 
 	if err := s.userRepo.UpdateUserBalance(tx, fromUserID, fromUser.Balance); err != nil {
 		tx.Rollback()
+		s.log.Error().Err(err).Msgf("Failed to update balance of user with ID: %s", fromUserID)
 		return err
 	}
 
 	if err := s.userRepo.UpdateUserBalance(tx, toUserID, toUser.Balance); err != nil {
 		tx.Rollback()
+		s.log.Error().Err(err).Msgf("Failed to update balance of user with ID: %s", toUserID)
 		return err
 	}
 
 	if err := tx.Commit().Error; err != nil {
 		tx.Rollback()
+		s.log.Error().Err(err).Msgf("Failed to commit transaction")
 		return err
 	}
 
+	s.log.Info().Msgf("Successfully transferred from %s to %s", fromUserID, toUserID)
 	return nil
 }
 
 func (s *UserServiceImpl) PurchaseMerch(userID uuid.UUID, merchItemName string) error {
 	user, err := s.userRepo.GetUserByID(userID)
 	if err != nil {
+		s.log.Error().Err(err).Msgf("Failed to get user with ID: %s", userID)
 		return err
 	}
 
 	merchItem, err := s.merchService.GetMerchItemByName(merchItemName)
 	if err != nil {
+		s.log.Error().Err(err).Msgf("Failed to get merch with name: %s", merchItemName)
 		return err
 	}
 
 	if user.Balance < merchItem.Price {
+		s.log.Info().Msgf("User: %s does not have enough funds", userID)
 		return models.ErrNotEnoughFunds
 	}
 
@@ -123,13 +135,16 @@ func (s *UserServiceImpl) PurchaseMerch(userID uuid.UUID, merchItemName string) 
 	}
 
 	if err := s.transactionRepo.CreateTransaction(nil, &transaction); err != nil {
+		s.log.Error().Err(err).Msgf("Failed to create transaction")
 		return err
 	}
 
 	if err := s.userRepo.UpdateUserBalance(nil, userID, user.Balance); err != nil {
+		s.log.Error().Err(err).Msgf("Failed to update balance of user with ID: %s", userID)
 		return err
 	}
 
+	s.log.Info().Msgf("Successfully purchased %s by %s", merchItemName, userID)
 	return nil
 }
 
@@ -154,6 +169,7 @@ func (s *UserServiceImpl) CreateUser(username, passwordHash string) (*models.Use
 		s.log.Error().Err(err).Msg("Error creating user")
 		return nil, err
 	}
+	s.log.Info().Msgf("Successfully created user: %s", user.Username)
 	return user, nil
 }
 
@@ -167,6 +183,7 @@ func (s *UserServiceImpl) GetUserByID(userID uuid.UUID) (*models.User, error) {
 		s.log.Error().Err(err).Msg("Error getting user by id")
 		return nil, err
 	}
+	s.log.Info().Msgf("Successfully got user: %s", user.Username)
 	return user, nil
 }
 
@@ -176,6 +193,7 @@ func (s *UserServiceImpl) UpdateUser(user *models.User) error {
 		s.log.Error().Err(err).Msg("Error updating user")
 		return err
 	}
+	s.log.Info().Msgf("Successfully updated user: %s", user.Username)
 	return nil
 }
 
@@ -185,5 +203,6 @@ func (s *UserServiceImpl) DeleteUser(userID uuid.UUID) error {
 		s.log.Error().Err(err).Msg("Error deleting user")
 		return err
 	}
+	s.log.Info().Msgf("Successfully deleted user: %s", userID)
 	return nil
 }
