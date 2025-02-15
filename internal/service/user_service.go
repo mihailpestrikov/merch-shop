@@ -2,7 +2,7 @@ package service
 
 import (
 	"Avito-backend-trainee-assignment-winter-2025/internal/models"
-	"Avito-backend-trainee-assignment-winter-2025/repository"
+	repository2 "Avito-backend-trainee-assignment-winter-2025/internal/repository"
 	"errors"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
@@ -22,13 +22,13 @@ type UserService interface {
 }
 
 type UserServiceImpl struct {
-	userRepo        repository.UserRepository
-	transactionRepo repository.TransactionRepository
+	userRepo        repository2.UserRepository
+	transactionRepo repository2.TransactionRepository
 	merchService    MerchService
 	log             *zerolog.Logger
 }
 
-func NewUserService(userRepo repository.UserRepository, transactionRepo repository.TransactionRepository, merchService MerchService, log *zerolog.Logger) *UserServiceImpl {
+func NewUserService(userRepo repository2.UserRepository, transactionRepo repository2.TransactionRepository, merchService MerchService, log *zerolog.Logger) *UserServiceImpl {
 	return &UserServiceImpl{userRepo: userRepo, transactionRepo: transactionRepo, merchService: merchService, log: log}
 }
 

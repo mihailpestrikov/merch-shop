@@ -2,7 +2,7 @@ package service
 
 import (
 	"Avito-backend-trainee-assignment-winter-2025/internal/models"
-	"Avito-backend-trainee-assignment-winter-2025/repository"
+	"Avito-backend-trainee-assignment-winter-2025/internal/repository"
 	"github.com/rs/zerolog"
 )
 
