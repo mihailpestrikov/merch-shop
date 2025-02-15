@@ -18,6 +18,7 @@ type Config struct {
 	DBPort          string
 	LogLevel        string
 	LogFormat       string
+	SecretKey       string
 	ShutdownTimeout time.Duration
 }
 
@@ -53,6 +54,7 @@ func LoadConfig() (*Config, error) {
 	DBSslMode := viper.GetString("db.ssl-mode")
 	LogLevel := viper.GetString("log.level")
 	LogFormat := viper.GetString("log.format")
+	SecretKey := viper.GetString("auth.secret-key")
 	ShutdownTimeoutStr := viper.GetString("app.shutdown-timeout")
 
 	if ShutdownTimeoutStr == "" {
@@ -61,6 +63,10 @@ func LoadConfig() (*Config, error) {
 
 	if AppName == "" || AppHost == "" || AppPort == "" {
 		return nil, fmt.Errorf("one or more app configuration fields are empty")
+	}
+
+	if SecretKey == "" {
+		return nil, fmt.Errorf("jwt secret key is empty")
 	}
 
 	ShutdownTimeout, err := time.ParseDuration(ShutdownTimeoutStr + "s")
@@ -88,6 +94,7 @@ func LoadConfig() (*Config, error) {
 		DBPort:          DBPort,
 		LogLevel:        LogLevel,
 		LogFormat:       LogFormat,
+		SecretKey:       SecretKey,
 		ShutdownTimeout: ShutdownTimeout,
 	}
 

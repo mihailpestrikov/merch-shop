@@ -10,6 +10,7 @@ import (
 type UserRepository interface {
 	BeginTransaction() *gorm.DB
 	GetUserByID(userID uuid.UUID) (*models.User, error)
+	GetUserByUsername(username string) (*models.User, error)
 	UpdateUserBalance(tx *gorm.DB, userID uuid.UUID, newBalance int) error
 	GetPurchasedItems(userID uuid.UUID) ([]models.MerchItem, error)
 	GetTransactionHistory(userID uuid.UUID) ([]models.Transaction, error)
@@ -34,6 +35,17 @@ func (r *UserRepositoryImpl) BeginTransaction() *gorm.DB {
 func (r *UserRepositoryImpl) GetUserByID(userID uuid.UUID) (*models.User, error) {
 	var user models.User
 	if err := r.db.First(&user, "id = ?", userID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, models.ErrUserNotFound
+		}
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (r *UserRepositoryImpl) GetUserByUsername(username string) (*models.User, error) {
+	var user models.User
+	if err := r.db.First(&user, "username = ?", username).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, models.ErrUserNotFound
 		}

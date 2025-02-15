@@ -17,6 +17,7 @@ type UserService interface {
 	GetTransactionHistory(userID uuid.UUID) ([]models.Transaction, error)
 	CreateUser(username, passwordHash string) (*models.User, error)
 	GetUserByID(userID uuid.UUID) (*models.User, error)
+	GetUserByUsername(username string) (*models.User, error)
 	UpdateUser(user *models.User) error
 	DeleteUser(userID uuid.UUID) error
 }
@@ -158,10 +159,10 @@ func (s *UserServiceImpl) GetTransactionHistory(userID uuid.UUID) ([]models.Tran
 
 func (s *UserServiceImpl) CreateUser(username, passwordHash string) (*models.User, error) {
 	user := &models.User{
-		ID:           uuid.New(),
-		Username:     username,
-		PasswordHash: passwordHash,
-		Balance:      1000,
+		ID:       uuid.New(),
+		Username: username,
+		Password: passwordHash,
+		Balance:  1000,
 	}
 
 	err := s.userRepo.CreateUser(user)
@@ -181,6 +182,20 @@ func (s *UserServiceImpl) GetUserByID(userID uuid.UUID) (*models.User, error) {
 			return nil, err
 		}
 		s.log.Error().Err(err).Msg("Error getting user by id")
+		return nil, err
+	}
+	s.log.Info().Msgf("Successfully got user: %s", user.Username)
+	return user, nil
+}
+
+func (s *UserServiceImpl) GetUserByUsername(username string) (*models.User, error) {
+	user, err := s.userRepo.GetUserByUsername(username)
+	if err != nil {
+		if errors.Is(err, models.ErrUserNotFound) {
+			s.log.Info().Err(err).Msg("User not found")
+			return nil, err
+		}
+		s.log.Error().Err(err).Msg("Error getting user by username")
 		return nil, err
 	}
 	s.log.Info().Msgf("Successfully got user: %s", user.Username)
