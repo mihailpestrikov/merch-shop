@@ -31,6 +31,7 @@ func NewAuthService(db *gorm.DB, log *zerolog.Logger, userService UserService, c
 
 func (s *AuthServiceImpl) Register(user models.User) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	s.log.Info().Msg(string(hashedPassword))
 	if err != nil {
 		s.log.Error().Err(err).Msg("Failed to hash password")
 		return err
@@ -38,18 +39,15 @@ func (s *AuthServiceImpl) Register(user models.User) error {
 	user.Password = string(hashedPassword)
 
 	if _, err := s.userService.CreateUser(user.Username, user.Password); err != nil {
-		s.log.Error().Err(err).Msg("Failed to create user")
 		return err
 	}
 
-	s.log.Info().Msg("User created")
 	return nil
 }
 
 func (s *AuthServiceImpl) Login(username, password string) (string, error) {
-	var user models.User
-	if _, err := s.userService.GetUserByUsername(username); err != nil {
-		s.log.Error().Err(err).Msg("Failed to find user")
+	user, err := s.userService.GetUserByUsername(username)
+	if err != nil {
 		return "", err
 	}
 
