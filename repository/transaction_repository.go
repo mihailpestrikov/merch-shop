@@ -13,12 +13,17 @@ type TransactionRepositoryImpl struct {
 	db *gorm.DB
 }
 
-func NewTransactionRepositoryImpl(db *gorm.DB) *TransactionRepositoryImpl {
+func NewTransactionRepository(db *gorm.DB) *TransactionRepositoryImpl {
 	return &TransactionRepositoryImpl{db: db}
 }
 
 func (r *TransactionRepositoryImpl) CreateTransaction(tx *gorm.DB, transaction *models.Transaction) error {
-	if err := tx.Create(transaction).Error; err != nil {
+	db := r.db
+	if tx != nil {
+		db = tx
+	}
+
+	if err := db.Create(transaction).Error; err != nil {
 		return err
 	}
 	return nil

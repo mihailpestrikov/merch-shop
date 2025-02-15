@@ -3,27 +3,24 @@ package repository
 import (
 	"Avito-backend-trainee-assignment-winter-2025/internal/models"
 	"errors"
-	"fmt"
-	"github.com/rs/zerolog"
 	"gorm.io/gorm"
 )
 
 type MerchRepository interface {
 	GetAll() ([]models.MerchItem, error)
 	GetByName(merchItemName string) (*models.MerchItem, error)
-	Create(item *models.MerchItem) error
-	Update(merchItemName string, item *models.MerchItem) error
-	Delete(merchItemName string) error
+	CreateMerch(item *models.MerchItem) error
+	UpdateMerch(merchItemName string, item *models.MerchItem) error
+	DeleteMerch(merchItemName string) error
 	InitMerchItems() error
 }
 
 type MerchRepositoryImpl struct {
-	db  *gorm.DB
-	log *zerolog.Logger
+	db *gorm.DB
 }
 
-func NewMerchRepository(db *gorm.DB, log *zerolog.Logger) MerchRepository {
-	return &MerchRepositoryImpl{db: db, log: log}
+func NewMerchRepository(db *gorm.DB) MerchRepository {
+	return &MerchRepositoryImpl{db: db}
 }
 
 func (r *MerchRepositoryImpl) GetAll() ([]models.MerchItem, error) {
@@ -36,40 +33,40 @@ func (r *MerchRepositoryImpl) GetByName(merchItemName string) (*models.MerchItem
 	var item models.MerchItem
 	if err := r.db.First(&item, "name = ?", merchItemName).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, fmt.Errorf("merch item with name %s not found", merchItemName)
+			return nil, models.ErrMerchItemNotFound
 		}
 		return nil, err
 	}
 	return &item, nil
 }
 
-func (r *MerchRepositoryImpl) Create(item *models.MerchItem) error {
+func (r *MerchRepositoryImpl) CreateMerch(item *models.MerchItem) error {
 	return r.db.Create(item).Error
 }
 
-func (r *MerchRepositoryImpl) Update(merchItemName string, item *models.MerchItem) error {
+func (r *MerchRepositoryImpl) UpdateMerch(merchItemName string, item *models.MerchItem) error {
 	result := r.db.Model(&models.MerchItem{}).Where("name = ?", merchItemName).Updates(item)
 
 	if result.Error != nil {
-		return fmt.Errorf("failed to update merch item: %w", result.Error)
+		return result.Error
 	}
 
 	if result.RowsAffected == 0 {
-		return fmt.Errorf("merch item with name %s not found", merchItemName)
+		return models.ErrMerchItemNotFound
 	}
 
 	return nil
 }
 
-func (r *MerchRepositoryImpl) Delete(merchItemName string) error {
+func (r *MerchRepositoryImpl) DeleteMerch(merchItemName string) error {
 	result := r.db.Model(&models.MerchItem{}).Where("name = ?", merchItemName).Delete(&models.MerchItem{})
 
 	if result.Error != nil {
-		return fmt.Errorf("failed to delete merch item: %w", result.Error)
+		return result.Error
 	}
 
 	if result.RowsAffected == 0 {
-		return fmt.Errorf("merch item with name %s not found", merchItemName)
+		return models.ErrMerchItemNotFound
 	}
 
 	return nil
@@ -95,12 +92,7 @@ func (r *MerchRepositoryImpl) InitMerchItems() error {
 
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			if err := r.db.Create(&item).Error; err != nil {
-				// log ?
-				return fmt.Errorf("error creating merch item %s: %e", item.Name, err)
-			}
-			r.log.Info().Msgf("Item %s created", item.Name)
-			if err != nil {
-				return fmt.Errorf("merch item %s already creaeted", item.Name)
+				return err
 			}
 		}
 	}
