@@ -17,12 +17,13 @@ type UserRepository interface {
 }
 
 type UserRepositoryImpl struct {
-	log *zerolog.Logger
-	db  *gorm.DB
+	transactionRepo TransactionRepository
+	log             *zerolog.Logger
+	db              *gorm.DB
 }
 
-func NewUserRepositoryImpl(log *zerolog.Logger, db *gorm.DB) *UserRepositoryImpl {
-	return &UserRepositoryImpl{log: log, db: db}
+func NewUserRepositoryImpl(transactionRepo TransactionRepository, log *zerolog.Logger, db *gorm.DB) *UserRepositoryImpl {
+	return &UserRepositoryImpl{transactionRepo: transactionRepo, log: log, db: db}
 }
 
 func (r *UserRepositoryImpl) GetUserByID(userID uuid.UUID) (*models.User, error) {
@@ -36,15 +37,30 @@ func (r *UserRepositoryImpl) GetUserByID(userID uuid.UUID) (*models.User, error)
 	return &user, nil
 }
 
-func (r *UserRepositoryImpl) UpdateUserBalance(userID uuid.UUID, newBalance int) error {
-	result := r.db.Model(&models.User{}).Where("id = ?", userID).Update("balance", newBalance)
+func (r *UserRepositoryImpl) UpdateUserBalance(userID uuid.UUID, newBalance int, transaction *models.Transaction) error {
+	tx := r.db.Begin()
+	if tx.Error != nil {
+		return tx.Error
+	}
 
+	if err := r.transactionRepo.CreateTransaction(tx, transaction); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	result := tx.Model(&models.User{}).Where("id = ?", userID).Update("balance", newBalance)
 	if result.Error != nil {
+		tx.Rollback()
 		return fmt.Errorf("failed to update balance: %w", result.Error)
 	}
 
 	if result.RowsAffected == 0 {
+		tx.Rollback()
 		return fmt.Errorf("user with ID %s not found", userID.String())
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	return nil
