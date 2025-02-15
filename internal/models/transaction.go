@@ -13,7 +13,7 @@ const (
 )
 
 type Transaction struct {
-	ID          uuid.UUID       `gorm:"type:uuid;primaryKey;"`
+	ID          uuid.UUID       `gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
 	Type        TransactionType `gorm:"not null"`
 	FromUserID  uuid.UUID       `gorm:"type:uuid;not null"`
 	ToUserID    uuid.UUID       `gorm:"type:uuid;not null"`

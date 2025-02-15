@@ -7,10 +7,10 @@ import (
 )
 
 type User struct {
-	ID           uuid.UUID `gorm:"type:uuid;primaryKey;"`
+	ID           uuid.UUID `gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
 	Username     string    `gorm:"uniqueIndex;not null"`
 	PasswordHash string    `gorm:"not null"`
-	Coins        int       `gorm:"not null;default:1000"`
+	Balance      int       `gorm:"not null;default:1000"`
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }
