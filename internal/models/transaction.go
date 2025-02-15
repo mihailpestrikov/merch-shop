@@ -13,11 +13,11 @@ const (
 )
 
 type Transaction struct {
-	ID          uuid.UUID       `gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
-	Type        TransactionType `gorm:"not null"`
-	FromUserID  uuid.UUID       `gorm:"type:uuid;not null"`
-	ToUserID    uuid.UUID       `gorm:"type:uuid;not null"`
-	Amount      int             `gorm:"not null"`
-	MerchItemID *uuid.UUID      `gorm:"type:uuid"`
-	CreatedAt   time.Time       `gorm:"not null"`
+	ID            uuid.UUID       `gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
+	Type          TransactionType `gorm:"not null"`
+	FromUserID    uuid.UUID       `gorm:"type:uuid;not null"`
+	ToUserID      uuid.UUID       `gorm:"type:uuid;not null"`
+	Amount        int             `gorm:"not null"`
+	MerchItemName *string         `gorm:"type:string"`
+	CreatedAt     time.Time       `gorm:"not null"`
 }
