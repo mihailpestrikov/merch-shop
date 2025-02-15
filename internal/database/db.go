@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func ConnectDB(cfg *config.Config, logger *zerolog.Logger) (*gorm.DB, error) {
+func ConnectDB(cfg *config.Config, log *zerolog.Logger) (*gorm.DB, error) {
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 		cfg.DBHost,
@@ -20,10 +20,11 @@ func ConnectDB(cfg *config.Config, logger *zerolog.Logger) (*gorm.DB, error) {
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		return nil, fmt.Errorf("error connecting to db, %s", err)
+		log.Fatal().Err(err).Msg("Failed to connect to database")
+		return nil, err
 	}
 
-	logger.Info().Msg("Connected to database")
+	log.Info().Msg("Connected to database")
 
 	return db, nil
 }

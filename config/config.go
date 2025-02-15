@@ -3,20 +3,22 @@ package config
 import (
 	"fmt"
 	"github.com/spf13/viper"
+	"time"
 )
 
 type Config struct {
-	AppName   string
-	AppEnv    string
-	AppHost   string
-	AppPort   string
-	DBHost    string
-	DBUser    string
-	DBPass    string
-	DBName    string
-	DBPort    string
-	LogLevel  string
-	LogFormat string
+	AppName         string
+	AppEnv          string
+	AppHost         string
+	AppPort         string
+	DBHost          string
+	DBUser          string
+	DBPass          string
+	DBName          string
+	DBPort          string
+	LogLevel        string
+	LogFormat       string
+	ShutdownTimeout time.Duration
 }
 
 func LoadConfig() (*Config, error) {
@@ -51,9 +53,19 @@ func LoadConfig() (*Config, error) {
 	DBSslMode := viper.GetString("db.ssl-mode")
 	LogLevel := viper.GetString("log.level")
 	LogFormat := viper.GetString("log.format")
+	ShutdownTimeoutStr := viper.GetString("app.shutdown-timeout")
+
+	if ShutdownTimeoutStr == "" {
+		ShutdownTimeoutStr = "10"
+	}
 
 	if AppName == "" || AppHost == "" || AppPort == "" {
 		return nil, fmt.Errorf("one or more app configuration fields are empty")
+	}
+
+	ShutdownTimeout, err := time.ParseDuration(ShutdownTimeoutStr + "s")
+	if err != nil {
+		return nil, fmt.Errorf("error parsing shutdown timeout: %w", err)
 	}
 
 	if DBHost == "" || DBUser == "" || DBPass == "" || DBName == "" || DBPort == "" || DBSslMode == "" {
@@ -65,17 +77,18 @@ func LoadConfig() (*Config, error) {
 	}
 
 	config := Config{
-		AppName:   AppName,
-		AppHost:   AppHost,
-		AppPort:   AppPort,
-		AppEnv:    env,
-		DBHost:    DBHost,
-		DBUser:    DBUser,
-		DBPass:    DBPass,
-		DBName:    DBName,
-		DBPort:    DBPort,
-		LogLevel:  LogLevel,
-		LogFormat: LogFormat,
+		AppName:         AppName,
+		AppHost:         AppHost,
+		AppPort:         AppPort,
+		AppEnv:          env,
+		DBHost:          DBHost,
+		DBUser:          DBUser,
+		DBPass:          DBPass,
+		DBName:          DBName,
+		DBPort:          DBPort,
+		LogLevel:        LogLevel,
+		LogFormat:       LogFormat,
+		ShutdownTimeout: ShutdownTimeout,
 	}
 
 	return &config, nil
