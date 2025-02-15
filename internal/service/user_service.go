@@ -8,6 +8,7 @@ import (
 
 type UserService interface {
 	TransferCoins(fromUserID, toUserID uuid.UUID, amount int) error
+	GetBalance(userID uuid.UUID) error
 	PurchaseMerch(userID uuid.UUID, merchItemID uuid.UUID) error
 	GetPurchasedItems(userID uuid.UUID) ([]models.MerchItem, error)
 	GetTransactionHistory(userID uuid.UUID) ([]models.Transaction, error)
@@ -15,6 +16,15 @@ type UserService interface {
 
 type UserServiceImpl struct {
 	db *gorm.DB
+}
+
+func NewUserServiceImpl(db *gorm.DB) UserService {
+	return &UserServiceImpl{db: db}
+}
+
+func (s *UserServiceImpl) GetBalance(userID uuid.UUID) error {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (s *UserServiceImpl) TransferCoins(fromUserID, toUserID uuid.UUID, amount int) error {
@@ -25,10 +35,6 @@ func (s *UserServiceImpl) TransferCoins(fromUserID, toUserID uuid.UUID, amount i
 func (s *UserServiceImpl) PurchaseMerch(userID uuid.UUID, merchItemID uuid.UUID) error {
 	//TODO implement me
 	panic("implement me")
-}
-
-func NewUserService(db *gorm.DB) UserService {
-	return &UserServiceImpl{db: db}
 }
 
 func (s *UserServiceImpl) GetPurchasedItems(userID uuid.UUID) ([]models.MerchItem, error) {
