@@ -30,7 +30,7 @@
 
 1. Клонировать репозиторий:
 ```bash
-git clone https://github.com/mpstrkv/Avito-backend-trainee-assignment-winter-2025
+git clone https://github.com/mihailpestrikov/Avito-backend-trainee-assignment-winter-2025
 cd Avito-Backend-Trainee-Assignment-Winter-2025
 ```
 2. Запустить сервисы:
