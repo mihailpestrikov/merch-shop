@@ -1,0 +1,300 @@
+definitions:
+  dto.AuthRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  dto.AuthResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  dto.CoinHistory:
+    properties:
+      received:
+        items:
+          $ref: '#/definitions/dto.ReceivedCoin'
+        type: array
+      sent:
+        items:
+          $ref: '#/definitions/dto.SentCoin'
+        type: array
+    type: object
+  dto.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  dto.InfoResponse:
+    properties:
+      coinHistory:
+        $ref: '#/definitions/dto.CoinHistory'
+      coins:
+        type: integer
+      inventory:
+        items:
+          $ref: '#/definitions/dto.InventoryItem'
+        type: array
+    type: object
+  dto.InventoryItem:
+    properties:
+      quantity:
+        type: integer
+      type:
+        type: string
+    type: object
+  dto.MerchItemResponse:
+    properties:
+      name:
+        type: string
+      price:
+        type: integer
+    type: object
+  dto.MerchItemsResponse:
+    properties:
+      merchItems:
+        items:
+          $ref: '#/definitions/dto.MerchItemResponse'
+        type: array
+    type: object
+  dto.ReceivedCoin:
+    properties:
+      amount:
+        type: integer
+      fromUser:
+        type: string
+    type: object
+  dto.SendCoinRequest:
+    properties:
+      amount:
+        type: integer
+      toUser:
+        type: string
+    type: object
+  dto.SentCoin:
+    properties:
+      amount:
+        type: integer
+      toUser:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /api/add-coins/{amount}:
+    post:
+      consumes:
+      - application/json
+      description: Увеличивает баланс монет у пользователя, если передан корректный
+        `amount`.
+      parameters:
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Количество монет
+        in: path
+        name: amount
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Coins added successfully
+          schema:
+            type: string
+        "400":
+          description: Invalid amount parameter
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Failed to add coins
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Добавление монет пользователю
+      tags:
+      - user
+  /api/auth:
+    post:
+      consumes:
+      - application/json
+      description: Позволяет пользователю аутентифицироваться и получить JWT-токен.
+        Если пользователь не существует, он будет автоматически зарегистрирован.
+      parameters:
+      - description: Тело запроса для авторизации
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AuthRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешная аутентификация
+          schema:
+            $ref: '#/definitions/dto.AuthResponse'
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Неавторизован
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Аутентификация и получение JWT-токена
+      tags:
+      - auth
+  /api/buy/{item}:
+    get:
+      consumes:
+      - application/json
+      description: Позволяет пользователю купить предмет за монеты.
+      parameters:
+      - description: Название предмета
+        in: path
+        name: item
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Недостаточно монет
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Неавторизован
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Купить предмет за монеты
+      tags:
+      - user
+  /api/info:
+    get:
+      consumes:
+      - application/json
+      description: Позволяет пользователю получить информацию о своих монетах, инвентаре
+        и истории транзакций.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ
+          schema:
+            $ref: '#/definitions/dto.InfoResponse'
+        "401":
+          description: Неавторизован
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Получить информацию о монетах, инвентаре и истории транзакций
+      tags:
+      - user
+  /api/merch:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список всех доступных товаров с их названиями и ценами.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ
+          schema:
+            $ref: '#/definitions/dto.MerchItemsResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Получить список всех товаров
+      tags:
+      - merch
+  /api/merch/{name}:
+    get:
+      consumes:
+      - application/json
+      description: Позволяет получить информацию о товаре по его имени.
+      parameters:
+      - description: Имя товара
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ
+          schema:
+            $ref: '#/definitions/dto.MerchItemResponse'
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Товар не найден
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Получить информацию о товаре по имени
+      tags:
+      - merch
+  /api/send-coins:
+    post:
+      consumes:
+      - application/json
+      description: Позволяет пользователю отправить монеты другому пользователю.
+      parameters:
+      - description: Тело запроса для передачи монет
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.SendCoinRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ
+          schema:
+            type: string
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Неавторизован
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Отправить монеты другому пользователю
+      tags:
+      - user
+swagger: "2.0"
