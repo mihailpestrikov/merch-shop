@@ -1,0 +1,13 @@
+linters:
+  disable-all: true
+  enable:
+    - gofmt
+    - gofumpt
+    - revive
+    - ineffassign
+    - cyclop
+    - funlen
+    - nlreturn
+run:
+  timeout: 10m
+  tests: false
