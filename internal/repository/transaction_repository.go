@@ -2,6 +2,7 @@ package repository
 
 import (
 	"Avito-backend-trainee-assignment-winter-2025/internal/models"
+
 	"gorm.io/gorm"
 )
 
@@ -26,5 +27,6 @@ func (r *TransactionRepositoryImpl) CreateTransaction(tx *gorm.DB, transaction *
 	if err := db.Create(transaction).Error; err != nil {
 		return err
 	}
+
 	return nil
 }

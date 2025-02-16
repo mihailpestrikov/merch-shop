@@ -2,8 +2,9 @@ package logger
 
 import (
 	"Avito-backend-trainee-assignment-winter-2025/config"
-	"github.com/rs/zerolog"
 	"os"
+
+	"github.com/rs/zerolog"
 )
 
 func InitLogger(cfg *config.Config) *zerolog.Logger {

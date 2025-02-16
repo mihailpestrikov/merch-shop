@@ -3,6 +3,7 @@ package repository
 import (
 	"Avito-backend-trainee-assignment-winter-2025/internal/models"
 	"errors"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -11,9 +12,9 @@ type UserRepository interface {
 	BeginTransaction() *gorm.DB
 	GetUserByID(userID uuid.UUID) (*models.User, error)
 	GetUserByUsername(username string) (*models.User, error)
-	UpdateUserBalance(tx *gorm.DB, userID uuid.UUID, newBalance int) error
-	GetPurchasedItems(userID uuid.UUID) ([]models.MerchItem, error)
-	GetTransactionHistory(userID uuid.UUID) ([]models.Transaction, error)
+	UpdateUserBalance(tx *gorm.DB, fromUsername string, newBalance int) error
+	GetPurchasedItems(username string) ([]models.MerchItem, error)
+	GetTransactionHistory(username string) ([]models.Transaction, error)
 	CreateUser(user *models.User) error
 	UpdateUser(userID uuid.UUID, user *models.User) error
 	DeleteUser(userID uuid.UUID) error
@@ -38,8 +39,10 @@ func (r *UserRepositoryImpl) GetUserByID(userID uuid.UUID) (*models.User, error)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, models.ErrUserNotFound
 		}
+
 		return nil, err
 	}
+
 	return &user, nil
 }
 
@@ -49,18 +52,20 @@ func (r *UserRepositoryImpl) GetUserByUsername(username string) (*models.User, e
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, models.ErrUserNotFound
 		}
+
 		return nil, err
 	}
+
 	return &user, nil
 }
 
-func (r *UserRepositoryImpl) UpdateUserBalance(tx *gorm.DB, userID uuid.UUID, newBalance int) error {
+func (r *UserRepositoryImpl) UpdateUserBalance(tx *gorm.DB, username string, newBalance int) error {
 	db := r.db
 	if tx != nil {
 		db = tx
 	}
 
-	result := db.Model(&models.User{}).Where("id = ?", userID).Update("balance", newBalance)
+	result := db.Model(&models.User{}).Where("username = ?", username).Update("balance", newBalance)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -72,13 +77,12 @@ func (r *UserRepositoryImpl) UpdateUserBalance(tx *gorm.DB, userID uuid.UUID, ne
 	return nil
 }
 
-func (r *UserRepositoryImpl) GetPurchasedItems(userID uuid.UUID) ([]models.MerchItem, error) {
+func (r *UserRepositoryImpl) GetPurchasedItems(username string) ([]models.MerchItem, error) {
 	var items []models.MerchItem
 
 	err := r.db.Joins("JOIN transactions ON transactions.merch_item_name = merch_items.name").
-		Where("transactions.to_user_id = ? AND transactions.type = ?", userID, models.TransactionTypePurchase).
+		Where("transactions.to_username = ? AND transactions.type = ?", username, models.TransactionTypePurchase).
 		Find(&items).Error
-
 	if err != nil {
 		return nil, err
 	}
@@ -86,13 +90,12 @@ func (r *UserRepositoryImpl) GetPurchasedItems(userID uuid.UUID) ([]models.Merch
 	return items, nil
 }
 
-func (r *UserRepositoryImpl) GetTransactionHistory(userID uuid.UUID) ([]models.Transaction, error) {
+func (r *UserRepositoryImpl) GetTransactionHistory(username string) ([]models.Transaction, error) {
 	var transactions []models.Transaction
 
-	err := r.db.Where("from_user_id = ? OR to_user_id = ?", userID, userID).
+	err := r.db.Where("from_username = ? OR to_username = ?", username, username).
 		Order("created_at DESC").
 		Find(&transactions).Error
-
 	if err != nil {
 		return nil, err
 	}

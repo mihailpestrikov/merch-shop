@@ -3,6 +3,7 @@ package repository
 import (
 	"Avito-backend-trainee-assignment-winter-2025/internal/models"
 	"errors"
+
 	"gorm.io/gorm"
 )
 
@@ -19,13 +20,14 @@ type MerchRepositoryImpl struct {
 	db *gorm.DB
 }
 
-func NewMerchRepository(db *gorm.DB) MerchRepository {
+func NewMerchRepository(db *gorm.DB) *MerchRepositoryImpl {
 	return &MerchRepositoryImpl{db: db}
 }
 
 func (r *MerchRepositoryImpl) GetAll() ([]models.MerchItem, error) {
 	var items []models.MerchItem
 	err := r.db.Find(&items).Error
+
 	return items, err
 }
 
@@ -35,8 +37,10 @@ func (r *MerchRepositoryImpl) GetByName(merchItemName string) (*models.MerchItem
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, models.ErrMerchItemNotFound
 		}
+
 		return nil, err
 	}
+
 	return &item, nil
 }
 
@@ -96,5 +100,6 @@ func (r *MerchRepositoryImpl) InitMerchItems() error {
 			}
 		}
 	}
+
 	return nil
 }
