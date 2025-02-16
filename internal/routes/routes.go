@@ -6,18 +6,17 @@ import (
 	"Avito-backend-trainee-assignment-winter-2025/internal/routes/middleware"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/rs/zerolog"
 	fiberSwagger "github.com/swaggo/fiber-swagger"
 )
 
 func SetupRoutes(
-	log *zerolog.Logger,
 	cfg *config.Config,
 	app *fiber.App,
 	merchHandler *handlers.MerchHandler,
 	userHandler *handlers.UserHandler,
 	authHandler *handlers.AuthHandler,
 ) {
+	app.Use(recover())
 	app.Static("/swagger", "./docs")
 	app.Get("/swagger/*", fiberSwagger.WrapHandler)
 
@@ -28,7 +27,7 @@ func SetupRoutes(
 	api.Get("/merch", merchHandler.GetAllMerch)
 	api.Get("/merch/:name", merchHandler.GetMerchByName)
 
-	protected := api.Group("/", middleware.AuthMiddleware(cfg, log))
+	protected := api.Group("/", middleware.AuthMiddleware(cfg))
 
 	protected.Get("/info", userHandler.GetInfo)
 	protected.Post("/send-coins", userHandler.SendCoins)

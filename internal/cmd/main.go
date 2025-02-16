@@ -56,7 +56,7 @@ func main() {
 
 	app := fiber.New()
 
-	routes.SetupRoutes(log, cfg, app, merchHandler, userHandler, authHandler)
+	routes.SetupRoutes(cfg, app, merchHandler, userHandler, authHandler)
 
 	port := cfg.AppHost + ":" + cfg.AppPort
 	log.Info().Msgf("Starting server on %s", port)
