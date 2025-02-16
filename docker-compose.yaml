@@ -1,0 +1,34 @@
+version: "3.8"
+
+services:
+  app:
+    build: .
+    container_name: avito-shop-service
+    ports:
+      - "8080:8080"
+    environment:
+      ENV: local
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:17
+    container_name: postgres_avito
+    restart: always
+    environment:
+      POSTGRES_USER: avito
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: avito_shop
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "sh -c 'pg_isready -U avito -d avito_shop'" ]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  pg_data:
