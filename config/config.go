@@ -20,13 +20,14 @@ type Config struct {
 	LogLevel        string
 	LogFormat       string
 	SecretKey       string
+	DBSslMode       string
 	ShutdownTimeout time.Duration
 }
 
-func LoadConfig() (*Config, error) {
+func LoadConfig(configPath string) (*Config, error) {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
-	viper.AddConfigPath("config")
+	viper.AddConfigPath(configPath)
 
 	if err := viper.ReadInConfig(); err != nil {
 		return nil, fmt.Errorf("error reading config file, %s", err)
@@ -93,6 +94,7 @@ func LoadConfig() (*Config, error) {
 		DBPass:          DBPass,
 		DBName:          DBName,
 		DBPort:          DBPort,
+		DBSslMode:       DBSslMode,
 		LogLevel:        LogLevel,
 		LogFormat:       LogFormat,
 		SecretKey:       SecretKey,
