@@ -7,12 +7,17 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-type MerchHandler struct {
+type MerchHandler interface {
+	GetAllMerch(c *fiber.Ctx) error
+	GetMerchByName(c *fiber.Ctx) error
+}
+
+type MerchHandlerImpl struct {
 	merchService service.MerchService
 }
 
-func NewMerchHandler(merchService service.MerchService) *MerchHandler {
-	return &MerchHandler{merchService: merchService}
+func NewMerchHandler(merchService service.MerchService) *MerchHandlerImpl {
+	return &MerchHandlerImpl{merchService: merchService}
 }
 
 // GetAllMerch godoc
@@ -24,7 +29,7 @@ func NewMerchHandler(merchService service.MerchService) *MerchHandler {
 // @Success 200 {object} dto.MerchItemsResponse "Успешный ответ"
 // @Failure 500 {object} dto.ErrorResponse "Внутренняя ошибка сервера"
 // @Router /api/merch [get]
-func (h *MerchHandler) GetAllMerch(c *fiber.Ctx) error {
+func (h *MerchHandlerImpl) GetAllMerch(c *fiber.Ctx) error {
 	merchItems, err := h.merchService.GetAllMerchItems()
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.ErrorResponse{
@@ -54,7 +59,7 @@ func (h *MerchHandler) GetAllMerch(c *fiber.Ctx) error {
 // @Failure 400 {object} dto.ErrorResponse "Неверный запрос"
 // @Failure 404 {object} dto.ErrorResponse "Товар не найден"
 // @Router /api/merch/{name} [get]
-func (h *MerchHandler) GetMerchByName(c *fiber.Ctx) error {
+func (h *MerchHandlerImpl) GetMerchByName(c *fiber.Ctx) error {
 	name := c.Params("name")
 	if name == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(dto.ErrorResponse{

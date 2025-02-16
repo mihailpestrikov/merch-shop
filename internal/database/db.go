@@ -3,6 +3,7 @@ package database
 import (
 	"Avito-backend-trainee-assignment-winter-2025/config"
 	"fmt"
+	"time"
 
 	"github.com/rs/zerolog"
 	"gorm.io/driver/postgres"
@@ -11,20 +12,32 @@ import (
 
 func ConnectDB(cfg *config.Config, log *zerolog.Logger) (*gorm.DB, error) {
 	dsn := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
+		"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
 		cfg.DBHost,
 		cfg.DBUser,
 		cfg.DBPass,
 		cfg.DBName,
 		cfg.DBPort,
+		cfg.DBSslMode,
 	)
 
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		SkipDefaultTransaction: true,
+		PrepareStmt:            true,
+	})
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to connect to database")
-
+		log.Error().Err(err).Msg("Failed to connect to database")
 		return nil, err
 	}
+
+	sqlDB, err := db.DB()
+	if err != nil {
+		return nil, err
+	}
+
+	sqlDB.SetMaxOpenConns(20)
+	sqlDB.SetMaxIdleConns(10)
+	sqlDB.SetConnMaxLifetime(time.Hour)
 
 	log.Info().Msg("Connected to database")
 

@@ -16,7 +16,7 @@ type UserService interface {
 	GetBalance(userID uuid.UUID) (int, error)
 	PurchaseMerch(username string, merchItemName string) error
 	GetInfo(userID uuid.UUID, username string) (*dto.InfoResponse, error)
-	CreateUser(username, passwordHash string) (*models.User, error)
+	CreateUser(username, password string) (*models.User, error)
 	GetUserByID(userID uuid.UUID) (*models.User, error)
 	GetUserByUsername(username string) (*models.User, error)
 	UpdateUser(user *models.User) error

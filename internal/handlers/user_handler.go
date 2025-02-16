@@ -11,13 +11,20 @@ import (
 	"github.com/google/uuid"
 )
 
-type UserHandler struct {
+type UserHandler interface {
+	BuyItem(c *fiber.Ctx) error
+	AddCoins(c *fiber.Ctx) error
+	SendCoins(c *fiber.Ctx) error
+	GetInfo(c *fiber.Ctx) error
+}
+
+type UserHandlerImpl struct {
 	authService service.AuthService
 	userService service.UserService
 }
 
-func NewUserHandler(authService service.AuthService, userService service.UserService) *UserHandler {
-	return &UserHandler{authService: authService, userService: userService}
+func NewUserHandler(authService service.AuthService, userService service.UserService) *UserHandlerImpl {
+	return &UserHandlerImpl{authService: authService, userService: userService}
 }
 
 // BuyItem godoc
@@ -32,7 +39,7 @@ func NewUserHandler(authService service.AuthService, userService service.UserSer
 // @Failure 400 {object} dto.ErrorResponse "Недостаточно монет"
 // @Failure 500 {object} dto.ErrorResponse "Внутренняя ошибка сервера"
 // @Router /api/buy/{item} [get]
-func (h *UserHandler) BuyItem(c *fiber.Ctx) error {
+func (h *UserHandlerImpl) BuyItem(c *fiber.Ctx) error {
 	itemName := c.Params("item")
 
 	username, ok := c.Locals("username").(string)
@@ -72,7 +79,7 @@ func (h *UserHandler) BuyItem(c *fiber.Ctx) error {
 // @Failure 400 {object} dto.ErrorResponse "Неверный запрос"
 // @Failure 500 {object} dto.ErrorResponse "Внутренняя ошибка сервера"
 // @Router /api/send-coins [post]
-func (h *UserHandler) SendCoins(c *fiber.Ctx) error {
+func (h *UserHandlerImpl) SendCoins(c *fiber.Ctx) error {
 	username, ok := c.Locals("username").(string)
 	if !ok {
 		return c.Status(fiber.StatusUnauthorized).JSON(dto.ErrorResponse{
@@ -108,7 +115,7 @@ func (h *UserHandler) SendCoins(c *fiber.Ctx) error {
 // @Failure 401 {object} dto.ErrorResponse "Неавторизован"
 // @Failure 500 {object} dto.ErrorResponse "Внутренняя ошибка сервера"
 // @Router /api/info [get]
-func (h *UserHandler) GetInfo(c *fiber.Ctx) error {
+func (h *UserHandlerImpl) GetInfo(c *fiber.Ctx) error {
 	username, ok1 := c.Locals("username").(string)
 	userID, ok2 := c.Locals("userID").(uuid.UUID)
 
@@ -141,7 +148,7 @@ func (h *UserHandler) GetInfo(c *fiber.Ctx) error {
 // @Failure 401 {object} dto.ErrorResponse "Unauthorized"
 // @Failure 500 {object} dto.ErrorResponse "Failed to add coins"
 // @Router /api/add-coins/{amount} [post]
-func (h *UserHandler) AddCoins(c *fiber.Ctx) error {
+func (h *UserHandlerImpl) AddCoins(c *fiber.Ctx) error {
 	amountStr := c.Params("amount")
 
 	amount, err := strconv.Atoi(amountStr)

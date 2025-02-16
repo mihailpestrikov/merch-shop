@@ -12,11 +12,10 @@ import (
 func SetupRoutes(
 	cfg *config.Config,
 	app *fiber.App,
-	merchHandler *handlers.MerchHandler,
-	userHandler *handlers.UserHandler,
-	authHandler *handlers.AuthHandler,
+	merchHandler handlers.MerchHandler,
+	userHandler handlers.UserHandler,
+	authHandler handlers.AuthHandler,
 ) {
-	app.Use(recover())
 	app.Static("/swagger", "./docs")
 	app.Get("/swagger/*", fiberSwagger.WrapHandler)
 

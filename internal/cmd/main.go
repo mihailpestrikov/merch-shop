@@ -18,7 +18,7 @@ import (
 )
 
 func main() {
-	cfg, err := config.LoadConfig()
+	cfg, err := config.LoadConfig("config")
 	if err != nil {
 		// panic before loading logger
 		panic(err)
@@ -43,7 +43,7 @@ func main() {
 
 	merchService := service.NewMerchService(merchRepo, log)
 	userService := service.NewUserService(userRepo, transactionRepo, merchService, log)
-	authService := service.NewAuthService(db, log, userService, cfg)
+	authService := service.NewAuthService(log, userService, cfg)
 
 	authHandler := handlers.NewAuthHandler(authService, userService, log)
 	userHandler := handlers.NewUserHandler(authService, userService)
@@ -66,7 +66,7 @@ func main() {
 
 	go func() {
 		if err := app.Listen(port); err != nil {
-			log.Fatal().Err(err).Msg("Failed to start server")
+			log.Error().Err(err).Msg("Failed to start server")
 		}
 	}()
 

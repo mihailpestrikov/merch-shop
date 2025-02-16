@@ -9,9 +9,9 @@ import (
 )
 
 func RunMigrations(db *gorm.DB, log *zerolog.Logger) error {
-	m := gormigrate.New(db, gormigrate.DefaultOptions, getMigrations())
+	m := gormigrate.New(db, gormigrate.DefaultOptions, GetMigrations())
 	if err := m.Migrate(); err != nil {
-		log.Fatal().Err(err).Msg("Failed to run migrations")
+		log.Error().Err(err).Msg("Failed to run migrations")
 
 		return err
 	}
@@ -20,7 +20,7 @@ func RunMigrations(db *gorm.DB, log *zerolog.Logger) error {
 	return nil
 }
 
-func getMigrations() []*gormigrate.Migration {
+func GetMigrations() []*gormigrate.Migration {
 	return []*gormigrate.Migration{
 		{
 			ID: "001_create_merch_table",
