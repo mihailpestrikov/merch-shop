@@ -25,44 +25,16 @@ func AuthMiddleware(cfg *config.Config) fiber.Handler {
 
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 
-		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fiber.NewError(fiber.StatusUnauthorized, "Invalid signing method")
-			}
+		claims := jwt.MapClaims{}
+		token, err := jwt.ParseWithClaims(tokenString, &claims, func(token *jwt.Token) (interface{}, error) {
 			return []byte(cfg.SecretKey), nil
 		})
-
-		if err != nil {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"error": "Invalid token",
-			})
+		if err != nil || !token.Valid {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid token"})
 		}
 
-		if !token.Valid {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"error": "Invalid token",
-			})
-		}
-
-		claims, ok := token.Claims.(jwt.MapClaims)
-		if !ok {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"error": "Invalid token claims",
-			})
-		}
-
-		userIDStr, ok := claims["user_id"].(string)
-		if !ok {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-				"error": "Invalid user ID in token",
-			})
-		}
-
-		userID, err := uuid.Parse(userIDStr)
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error": "Error parsing user ID",
-			})
+		if userID, err := uuid.Parse(claims["user_id"].(string)); err == nil {
+			c.Locals("userID", userID)
 		}
 
 		username, ok := claims["username"].(string)
@@ -72,7 +44,6 @@ func AuthMiddleware(cfg *config.Config) fiber.Handler {
 			})
 		}
 
-		c.Locals("userID", userID)
 		c.Locals("username", username)
 
 		return c.Next()
