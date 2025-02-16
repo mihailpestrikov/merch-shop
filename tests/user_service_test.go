@@ -15,10 +15,6 @@ type MockUserRepository struct {
 	mock.Mock
 }
 
-func (m *MockUserRepository) BeginTransaction() *gorm.DB {
-	return nil
-}
-
 func (m *MockUserRepository) CreateUser(user *models.User) error {
 	args := m.Called(user)
 	return args.Error(0)
@@ -67,6 +63,11 @@ func (m *MockUserRepository) GetTransactionHistory(username string) ([]models.Tr
 
 type MockTransactionRepository struct {
 	mock.Mock
+}
+
+func (m *MockTransactionRepository) BeginGormTransaction() *gorm.DB {
+	args := m.Called()
+	return args.Get(0).(*gorm.DB)
 }
 
 func (m *MockTransactionRepository) CreateTransaction(tx *gorm.DB, transaction *models.Transaction) error {

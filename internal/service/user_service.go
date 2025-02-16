@@ -62,7 +62,7 @@ func (s *UserServiceImpl) SendCoins(fromUsername, toUsername string, amount int)
 		return err
 	}
 
-	tx := s.userRepo.BeginTransaction()
+	tx := s.transactionRepo.BeginGormTransaction()
 	if tx.Error != nil {
 		return tx.Error
 	}

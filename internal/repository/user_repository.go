@@ -9,7 +9,6 @@ import (
 )
 
 type UserRepository interface {
-	BeginTransaction() *gorm.DB
 	GetUserByID(userID uuid.UUID) (*models.User, error)
 	GetUserByUsername(username string) (*models.User, error)
 	UpdateUserBalance(tx *gorm.DB, fromUsername string, newBalance int) error
@@ -27,10 +26,6 @@ type UserRepositoryImpl struct {
 
 func NewUserRepository(transactionRepo TransactionRepository, db *gorm.DB) *UserRepositoryImpl {
 	return &UserRepositoryImpl{transactionRepo: transactionRepo, db: db}
-}
-
-func (r *UserRepositoryImpl) BeginTransaction() *gorm.DB {
-	return r.db.Begin()
 }
 
 func (r *UserRepositoryImpl) GetUserByID(userID uuid.UUID) (*models.User, error) {

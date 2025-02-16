@@ -8,6 +8,7 @@ import (
 
 type TransactionRepository interface {
 	CreateTransaction(tx *gorm.DB, transaction *models.Transaction) error
+	BeginGormTransaction() *gorm.DB
 }
 
 type TransactionRepositoryImpl struct {
@@ -29,4 +30,8 @@ func (r *TransactionRepositoryImpl) CreateTransaction(tx *gorm.DB, transaction *
 	}
 
 	return nil
+}
+
+func (r *TransactionRepositoryImpl) BeginGormTransaction() *gorm.DB {
+	return r.db.Begin()
 }
