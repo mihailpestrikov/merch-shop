@@ -83,7 +83,7 @@ definitions:
 info:
   contact: {}
 paths:
-  /api/add-coins/{amount}:
+  /api/addCoin/{amount}:
     post:
       consumes:
       - application/json
@@ -263,7 +263,7 @@ paths:
       summary: Получить информацию о товаре по имени
       tags:
       - merch
-  /api/send-coins:
+  /api/sendCoin:
     post:
       consumes:
       - application/json

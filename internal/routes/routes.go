@@ -29,7 +29,7 @@ func SetupRoutes(
 	protected := api.Group("/", middleware.AuthMiddleware(cfg))
 
 	protected.Get("/info", userHandler.GetInfo)
-	protected.Post("/send-coins", userHandler.SendCoins)
+	protected.Post("/sendCoin", userHandler.SendCoins)
 	protected.Get("/buy/:item", userHandler.BuyItem)
-	protected.Post("/add-coins/:amount", userHandler.AddCoins)
+	protected.Post("/addCoin/:amount", userHandler.AddCoins)
 }

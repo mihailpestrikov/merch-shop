@@ -78,7 +78,7 @@ func (h *UserHandlerImpl) BuyItem(c *fiber.Ctx) error {
 // @Failure 401 {object} dto.ErrorResponse "Неавторизован"
 // @Failure 400 {object} dto.ErrorResponse "Неверный запрос"
 // @Failure 500 {object} dto.ErrorResponse "Внутренняя ошибка сервера"
-// @Router /api/send-coins [post]
+// @Router /api/sendCoin [post]
 func (h *UserHandlerImpl) SendCoins(c *fiber.Ctx) error {
 	username, ok := c.Locals("username").(string)
 	if !ok {
@@ -147,7 +147,7 @@ func (h *UserHandlerImpl) GetInfo(c *fiber.Ctx) error {
 // @Failure 400 {object} dto.ErrorResponse "Invalid amount parameter"
 // @Failure 401 {object} dto.ErrorResponse "Unauthorized"
 // @Failure 500 {object} dto.ErrorResponse "Failed to add coins"
-// @Router /api/add-coins/{amount} [post]
+// @Router /api/addCoin/{amount} [post]
 func (h *UserHandlerImpl) AddCoins(c *fiber.Ctx) error {
 	amountStr := c.Params("amount")
 

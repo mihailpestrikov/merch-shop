@@ -4,7 +4,7 @@
         "contact": {}
     },
     "paths": {
-        "/api/add-coins/{amount}": {
+        "/api/addCoin/{amount}": {
             "post": {
                 "description": "Увеличивает баланс монет у пользователя, если передан корректный `amount`.",
                 "consumes": [
@@ -272,7 +272,7 @@
                 }
             }
         },
-        "/api/send-coins": {
+        "/api/sendCoin": {
             "post": {
                 "description": "Позволяет пользователю отправить монеты другому пользователю.",
                 "consumes": [

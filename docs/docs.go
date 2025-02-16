@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/add-coins/{amount}": {
+        "/api/addCoin/{amount}": {
             "post": {
                 "description": "Увеличивает баланс монет у пользователя, если передан корректный ` + "`" + `amount` + "`" + `.",
                 "consumes": [
@@ -283,7 +283,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/send-coins": {
+        "/api/sendCoin": {
             "post": {
                 "description": "Позволяет пользователю отправить монеты другому пользователю.",
                 "consumes": [
