@@ -46,7 +46,7 @@ Swagger: http://localhost:8080/index.html
 ```
 
 ## API
-![alt text](swagger.png)
+![alt text](img/swagger.png)
 
 ### 1. Аутентификация
 **POST /api/auth**
@@ -159,8 +159,8 @@ auth:
 - response time ~ 40ms
 - failures 0%
 
-![alt text](total_requests_per_second_1739712506.787.png)
-![alt text](locust_statistics.png)
+![alt text](img/total_requests_per_second_1739712506.787.png)
+![alt text](img/locust_statistics.png)
 
 ```python
 from locust import HttpUser, task, between
