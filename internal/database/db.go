@@ -3,8 +3,6 @@ package database
 import (
 	"Avito-backend-trainee-assignment-winter-2025/config"
 	"fmt"
-	"time"
-
 	"github.com/rs/zerolog"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -35,9 +33,9 @@ func ConnectDB(cfg *config.Config, log *zerolog.Logger) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	sqlDB.SetMaxOpenConns(50)
-	sqlDB.SetMaxIdleConns(10)
-	sqlDB.SetConnMaxLifetime(time.Hour)
+	sqlDB.SetMaxOpenConns(cfg.MaxOpenConns)
+	sqlDB.SetMaxIdleConns(cfg.MaxIdleConns)
+	sqlDB.SetConnMaxLifetime(cfg.ConnMaxLifetime)
 
 	log.Info().Msg("Connected to database")
 

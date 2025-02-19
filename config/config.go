@@ -22,6 +22,9 @@ type Config struct {
 	SecretKey       string
 	DBSslMode       string
 	ShutdownTimeout time.Duration
+	MaxOpenConns    int
+	MaxIdleConns    int
+	ConnMaxLifetime time.Duration
 }
 
 func LoadConfig(configPath string) (*Config, error) {
@@ -58,6 +61,9 @@ func LoadConfig(configPath string) (*Config, error) {
 	LogFormat := viper.GetString("log.format")
 	SecretKey := viper.GetString("auth.secret-key")
 	ShutdownTimeoutStr := viper.GetString("app.shutdown-timeout")
+	MaxOpenConns := viper.GetInt("db.max-open-conns")
+	MaxIdleConns := viper.GetInt("db.max-idle-conns")
+	ConnMaxLifetime := viper.GetDuration("db.conn-max-lifetime")
 
 	if ShutdownTimeoutStr == "" {
 		ShutdownTimeoutStr = "10"
@@ -99,6 +105,9 @@ func LoadConfig(configPath string) (*Config, error) {
 		LogFormat:       LogFormat,
 		SecretKey:       SecretKey,
 		ShutdownTimeout: ShutdownTimeout,
+		MaxOpenConns:    MaxOpenConns,
+		MaxIdleConns:    MaxIdleConns,
+		ConnMaxLifetime: ConnMaxLifetime,
 	}
 
 	return &config, nil
