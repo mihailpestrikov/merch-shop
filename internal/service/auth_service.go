@@ -95,6 +95,11 @@ func (s *AuthServiceImpl) LoginOrRegister(username, password string) (string, er
 		"exp":      expTime,
 	})
 
+	s.log.Info().
+		Str("user_id", user.ID.String()).
+		Str("username", username).
+		Int64("exp", expTime).Msg("User logged in")
+
 	tokenString, err := token.SignedString([]byte(s.cfg.SecretKey))
 	if err != nil {
 		s.log.Error().Err(err).Msg("Failed to generate token")
