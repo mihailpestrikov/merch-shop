@@ -63,7 +63,7 @@ func LoadConfig(configPath string) (*Config, error) {
 	ShutdownTimeoutStr := viper.GetString("app.shutdown-timeout")
 	MaxOpenConns := viper.GetInt("db.max-open-conns")
 	MaxIdleConns := viper.GetInt("db.max-idle-conns")
-	ConnMaxLifetime := viper.GetDuration("db.conn-max-lifetime")
+	ConnMaxLifetimeStr := viper.GetString("db.conn-max-lifetime")
 
 	if ShutdownTimeoutStr == "" {
 		ShutdownTimeoutStr = "10"
@@ -78,6 +78,11 @@ func LoadConfig(configPath string) (*Config, error) {
 	}
 
 	ShutdownTimeout, err := time.ParseDuration(ShutdownTimeoutStr + "s")
+	if err != nil {
+		return nil, fmt.Errorf("error parsing shutdown timeout: %w", err)
+	}
+
+	ConnMaxLifetime, err := time.ParseDuration(ConnMaxLifetimeStr + "m")
 	if err != nil {
 		return nil, fmt.Errorf("error parsing shutdown timeout: %w", err)
 	}
