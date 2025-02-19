@@ -48,7 +48,9 @@ func (h *AuthHandlerImpl) Authenticate(c *fiber.Ctx) error {
 		})
 	}
 
-	h.log.Info().Msg("User logged in")
+	h.log.Info().
+		Str("username", req.Username).
+		Msg("User logged in")
 
 	return c.Status(fiber.StatusOK).JSON(dto.AuthResponse{
 		Token: token,
