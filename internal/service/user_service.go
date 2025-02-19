@@ -48,6 +48,11 @@ func (s *UserServiceImpl) GetBalance(userID uuid.UUID) (int, error) {
 }
 
 func (s *UserServiceImpl) SendCoins(fromUsername, toUsername string, amount int) error {
+	if fromUsername == toUsername {
+		s.log.Info().Msgf("User %s cannot send coins to themselves", fromUsername)
+		return models.ErrNotAllowedToSendCoinToYourself
+	}
+
 	fromUser, err := s.userRepo.GetUserByUsername(fromUsername)
 	if err != nil {
 		s.log.Error().Err(err).Msgf("Failed to get fromUser with username: %s", fromUsername)
