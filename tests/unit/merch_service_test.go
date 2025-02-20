@@ -1,4 +1,4 @@
-package tests
+package unit
 
 import (
 	"Avito-backend-trainee-assignment-winter-2025/internal/service"

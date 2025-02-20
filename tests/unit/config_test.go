@@ -1,4 +1,4 @@
-package tests
+package unit
 
 import (
 	config2 "Avito-backend-trainee-assignment-winter-2025/config"
