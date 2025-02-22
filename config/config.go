@@ -60,13 +60,13 @@ func LoadConfig(configPath string) (*Config, error) {
 	LogLevel := viper.GetString("log.level")
 	LogFormat := viper.GetString("log.format")
 	SecretKey := viper.GetString("auth.secret-key")
-	ShutdownTimeoutStr := viper.GetString("app.shutdown-timeout")
+	ShutdownTimeout := viper.GetDuration("app.shutdown-timeout")
 	MaxOpenConns := viper.GetInt("db.max-open-conns")
 	MaxIdleConns := viper.GetInt("db.max-idle-conns")
-	ConnMaxLifetimeStr := viper.GetString("db.conn-max-lifetime")
+	ConnMaxLifetime := viper.GetDuration("db.conn-max-lifetime")
 
-	if ShutdownTimeoutStr == "" {
-		ShutdownTimeoutStr = "10"
+	if ShutdownTimeout == 0 {
+		ShutdownTimeout = 10 * time.Second
 	}
 
 	if AppName == "" || AppHost == "" || AppPort == "" {
@@ -75,16 +75,6 @@ func LoadConfig(configPath string) (*Config, error) {
 
 	if SecretKey == "" {
 		return nil, fmt.Errorf("jwt secret key is empty")
-	}
-
-	ShutdownTimeout, err := time.ParseDuration(ShutdownTimeoutStr + "s")
-	if err != nil {
-		return nil, fmt.Errorf("error parsing shutdown timeout: %w", err)
-	}
-
-	ConnMaxLifetime, err := time.ParseDuration(ConnMaxLifetimeStr + "m")
-	if err != nil {
-		return nil, fmt.Errorf("error parsing shutdown timeout: %w", err)
 	}
 
 	if DBHost == "" || DBUser == "" || DBPass == "" || DBName == "" || DBPort == "" || DBSslMode == "" {
