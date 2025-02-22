@@ -135,7 +135,7 @@ app:
   name: "avito-shop-service"
   host: "0.0.0.0"
   port: "8080"
-  shutdown-timeout: "30"
+  shutdown-timeout: 30s
 ```
 - Локальный конфиг
 ```yaml
@@ -146,6 +146,9 @@ db:
   name: "avito_shop"
   port: "5432"
   ssl-mode: "disable"
+  max-open-conns: 50
+  max-idle-conns: 10
+  conn-max-lifetime: 60s
 log:
   level: "info"
   format: "text"
