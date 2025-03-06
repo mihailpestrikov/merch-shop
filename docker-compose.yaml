@@ -3,7 +3,7 @@ version: "3.8"
 services:
   app:
     build: .
-    container_name: avito-shop-service
+    container_name: merch-shop-service
     ports:
       - "8080:8080"
     environment:
@@ -15,18 +15,18 @@ services:
 
   postgres:
     image: postgres:17
-    container_name: postgres_avito
+    container_name: postgres_merch
     restart: always
     environment:
-      POSTGRES_USER: avito
+      POSTGRES_USER: shop
       POSTGRES_PASSWORD: secret
-      POSTGRES_DB: avito_shop
+      POSTGRES_DB: merch_shop
     ports:
       - "5432:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "sh -c 'pg_isready -U avito -d avito_shop'" ]
+      test: [ "CMD-SHELL", "sh -c 'pg_isready -U shop -d merch_shop'" ]
       interval: 5s
       timeout: 10s
       retries: 5

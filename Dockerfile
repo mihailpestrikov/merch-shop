@@ -1,7 +1,7 @@
 FROM golang:1.23.5
 
-WORKDIR ${GOPATH}/avito-shop/
-COPY . ${GOPATH}/avito-shop/
+WORKDIR ${GOPATH}/merch-shop/
+COPY . ${GOPATH}/merch-shop/
 
 RUN go build -o /build ./internal/cmd \
     && go clean -cache -modcache
