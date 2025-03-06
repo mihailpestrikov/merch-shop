@@ -1,6 +1,6 @@
-# Avito-backend-trainee-assignment-winter-2025
+# Merch-shop
 
-Реализация API для магазина мерча в рамках тестового задания для стажера Backend-направления avito.
+Реализация API для магазина мерча.
 
 ## Основные возможности:
 - Автоматическая регистрация и вход через JWT.
@@ -30,8 +30,8 @@
 
 1. Клонировать репозиторий:
 ```bash
-git clone https://github.com/mihailpestrikov/Avito-backend-trainee-assignment-winter-2025
-cd Avito-Backend-Trainee-Assignment-Winter-2025
+git clone https://github.com/mihailpestrikov/merch-shop
+cd merch-shop
 ```
 2. Запустить сервисы:
 
@@ -132,7 +132,7 @@ Authorization: Bearer <token>
 - Общий конфиг
 ```yaml
 app:
-  name: "avito-shop-service"
+  name: "merch-shop-service"
   host: "0.0.0.0"
   port: "8080"
   shutdown-timeout: 30s
@@ -141,9 +141,9 @@ app:
 ```yaml
 db:
   host: "postgres"
-  user: "avito"
+  user: "shop"
   password: "secret"
-  name: "avito_shop"
+  name: "merch_shop"
   port: "5432"
   ssl-mode: "disable"
   max-open-conns: 50
@@ -197,6 +197,3 @@ unit тесты
 ```
 go test ./tests/unit
 ```
-Проблема: не хотел использовать реальную бд, не хотел поднимать вторую тестовую бд, были проблемы с использованием моковой in-memory sqlite, поэтому долго не мог прийти к написанию e2e теста.  
-Решение: остановился на том, что текущий конфиг и docker-compose являются local, то есть тестовыми, поэтому использую postgres для e2e тестов, для prod была бы отдельная бд  
-Также стоило попробовать использовать Mockery для более удобных, лаконичных, читаемых тестов
